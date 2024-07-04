@@ -4,7 +4,7 @@ info:
   description: API Test
   version: 1.0.0
 servers:
-  - url: http://localhost:8080/api-test-1.0-SNAPSHOT/api
+  - url: http://localhost:8080/api-demo-1.0-SNAPSHOT/api
 paths:
   /user/login:
     post:

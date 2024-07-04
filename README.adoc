@@ -19,7 +19,7 @@
 [source,bash]
 ----
 # run oracle xe docker container
-docker run --name oracle-api-test -p 1521:1521 -p 5500:5500 -e ORACLE_PWD=password container-registry.oracle.com/database/express:21.3.0-xe
+docker run --name oracle-api-demo -p 1521:1521 -p 5500:5500 -e ORACLE_PWD=password container-registry.oracle.com/database/express:21.3.0-xe
 ----
 
 ==== Configure oracle
@@ -27,7 +27,7 @@ docker run --name oracle-api-test -p 1521:1521 -p 5500:5500 -e ORACLE_PWD=passwo
 [source,bash]
 ----
 # connect to bash in container
-docker exec -it oracle-api-test bash -c "source /home/oracle/.bashrc; bash"
+docker exec -it oracle-api-demo bash -c "source /home/oracle/.bashrc; bash"
 ----
 [source]
 ----
@@ -91,7 +91,7 @@ cd ../tools/wildfly-27.0.1.Final/bin/
 
 sh jboss-cli.sh --connect
 
-module add --name=com.oracle --resources=/home/.../api-test/ojdbc11/ojdbc11.jar --dependencies=javax.api,javax.transaction.api
+module add --name=com.oracle --resources=/home/.../api-demo/ojdbc11/ojdbc11.jar --dependencies=javax.api,javax.transaction.api
 
 /subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)
 
