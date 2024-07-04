@@ -1,4 +1,4 @@
-package com.example.apitest.domain.model;
+package com.example.apidemo.domain.model;
 
 import java.util.Objects;
 

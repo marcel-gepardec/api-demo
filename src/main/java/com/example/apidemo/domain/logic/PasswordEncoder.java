@@ -1,4 +1,4 @@
-package com.example.apitest.domain.logic;
+package com.example.apidemo.domain.logic;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.enterprise.context.ApplicationScoped;

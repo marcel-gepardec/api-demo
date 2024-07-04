@@ -1,7 +1,7 @@
-package com.example.apitest.domain.filter;
+package com.example.apidemo.domain.filter;
 
-import com.example.apitest.domain.filter.annotation.Secured;
-import com.example.apitest.domain.logic.JwtGenerator;
+import com.example.apidemo.domain.filter.annotation.Secured;
+import com.example.apidemo.domain.logic.JwtGenerator;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;

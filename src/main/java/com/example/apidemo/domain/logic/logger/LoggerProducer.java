@@ -1,4 +1,4 @@
-package com.example.apitest.domain.logic.logger;
+package com.example.apidemo.domain.logic.logger;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;

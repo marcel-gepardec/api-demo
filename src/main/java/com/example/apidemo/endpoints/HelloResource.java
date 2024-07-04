@@ -1,6 +1,6 @@
-package com.example.apitest.endpoints;
+package com.example.apidemo.endpoints;
 
-import com.example.apitest.domain.filter.annotation.Secured;
+import com.example.apidemo.domain.filter.annotation.Secured;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;

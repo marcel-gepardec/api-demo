@@ -1,8 +1,8 @@
-package com.example.apitest.infrastructure.jpa;
+package com.example.apidemo.infrastructure.jpa;
 
-import com.example.apitest.domain.model.Benutzer;
-import com.example.apitest.infrastructure.jpa.entity.BenutzerEntity;
-import com.example.apitest.infrastructure.jpa.translator.BenutzerEntityTranslator;
+import com.example.apidemo.domain.model.Benutzer;
+import com.example.apidemo.infrastructure.jpa.entity.BenutzerEntity;
+import com.example.apidemo.infrastructure.jpa.translator.BenutzerEntityTranslator;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.persistence.EntityManager;

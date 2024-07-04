@@ -1,4 +1,4 @@
-package com.example.apitest.domain.filter.annotation;
+package com.example.apidemo.domain.filter.annotation;
 
 import jakarta.ws.rs.NameBinding;
 

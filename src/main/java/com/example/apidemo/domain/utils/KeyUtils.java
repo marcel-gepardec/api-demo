@@ -1,4 +1,4 @@
-package com.example.apitest.domain.utils;
+package com.example.apidemo.domain.utils;
 
 import java.security.KeyFactory;
 import java.security.PrivateKey;

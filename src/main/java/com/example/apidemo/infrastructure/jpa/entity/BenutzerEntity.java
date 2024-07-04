@@ -1,4 +1,4 @@
-package com.example.apitest.infrastructure.jpa.entity;
+package com.example.apidemo.infrastructure.jpa.entity;
 
 import jakarta.persistence.*;
 

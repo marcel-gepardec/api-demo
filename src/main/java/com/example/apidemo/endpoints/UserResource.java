@@ -1,13 +1,12 @@
-package com.example.apitest.endpoints;
+package com.example.apidemo.endpoints;
 
-import com.example.apitest.domain.filter.annotation.Secured;
-import com.example.apitest.domain.logic.JwtGenerator;
-import com.example.apitest.domain.logic.PasswordEncoder;
-import com.example.apitest.domain.model.Benutzer;
-import com.example.apitest.infrastructure.jpa.BenutzerRepository;
-import com.example.apitest.rest.model.LoginResponseV1;
-import com.example.apitest.rest.model.LoginV1;
-import com.example.apitest.rest.model.RegistrationResponseV1;
+import com.example.apidemo.domain.logic.JwtGenerator;
+import com.example.apidemo.domain.logic.PasswordEncoder;
+import com.example.apidemo.domain.model.Benutzer;
+import com.example.apidemo.infrastructure.jpa.BenutzerRepository;
+import com.example.apidemo.rest.model.LoginResponseV1;
+import com.example.apidemo.rest.model.LoginV1;
+import com.example.apidemo.rest.model.RegistrationResponseV1;
 import jakarta.inject.Inject;
 import jakarta.persistence.NoResultException;
 import jakarta.ws.rs.*;

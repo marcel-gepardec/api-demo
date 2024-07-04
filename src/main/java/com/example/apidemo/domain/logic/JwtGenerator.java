@@ -1,4 +1,4 @@
-package com.example.apitest.domain.logic;
+package com.example.apidemo.domain.logic;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
@@ -40,7 +40,7 @@ public class JwtGenerator {
     public String generate() {
         try {
             return JWT.create()
-                    .withIssuer("ApiTest")
+                    .withIssuer("ApiDemo")
                     .withSubject("TestToken")
                     .withClaim("email", "testtoken@gmail.com")
                     .withExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))

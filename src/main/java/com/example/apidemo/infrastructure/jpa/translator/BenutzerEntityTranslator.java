@@ -1,7 +1,7 @@
-package com.example.apitest.infrastructure.jpa.translator;
+package com.example.apidemo.infrastructure.jpa.translator;
 
-import com.example.apitest.domain.model.Benutzer;
-import com.example.apitest.infrastructure.jpa.entity.BenutzerEntity;
+import com.example.apidemo.domain.model.Benutzer;
+import com.example.apidemo.infrastructure.jpa.entity.BenutzerEntity;
 import jakarta.enterprise.context.ApplicationScoped;
 
 @ApplicationScoped
