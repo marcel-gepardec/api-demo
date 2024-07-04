@@ -1,0 +1,112 @@
+openapi: 3.0.3
+info:
+  title: API Test
+  description: API Test
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api-test-1.0-SNAPSHOT/api
+paths:
+  /user/login:
+    post:
+      tags:
+        - Login
+      summary: Login with a email and passwort and compare it with the data from the db
+      description: Login with a email and passwort and compare it with the data from the db
+      operationId: login
+      requestBody:
+        description: Login with a email and passwort and compare it with the data from the db
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginV1'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponseV1'
+  /user/registration:
+    post:
+      tags:
+        - Registration
+      summary: Registration with a email and passwort
+      description: Registration with a email and passwort
+      operationId: registration
+      requestBody:
+        description: Registration with a email and passwort
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginV1'
+        required: true
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegistrationResponseV1'
+  /hello-world:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - HelloWorld
+      summary: HelloWorld
+      description: HelloWorld
+      operationId: helloWorld
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: Hello, World!
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+components:
+  schemas:
+    LoginV1:
+      required:
+        - email
+        - password
+      type: object
+      properties:
+        email:
+          type: string
+          example: jemand.example@gmail.com
+        password:
+          type: string
+          example: strongPassword
+
+    LoginResponseV1:
+      required:
+        - UserPasswordValid
+        - Token
+      type: object
+      properties:
+        UserPasswordValid:
+          type: boolean
+          example: true
+        Token:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0Iiwic3ViIjoiMTIzNU2Nzg5IiwibmFtZSI6InBldGVyIiwiZXhwIjoxNjk0NjE1MDA1fQ.t5Z3BHNhYGIeS1dkouAZojW7RWIQN46eEnG0AZXchQBnWXTJgPCwf2LOpCf7JVfbO4lyWEUxBM8CsMEMjM_vclrr75GJP1IEBcxBM2Q1IGXqutOjfuGcxMoINiEncg_ZBNwFOzcGe0nvn4VtDNlEwXT_gwBxi5AjqqOgjfdHCZqhiXYYmnCvr4VV-nwk-eZyzFCXzoGvtKRnNtzJRVtVEdY1e9rMuNPCIXGhxW1MiB3hZImjZjtKtDODDuNlflGfpOB6Q_cVSyE0o_3Iqs7K-nOuMTFW4iGs1IzkOZG-8POWFkhMjjW1aXConB2_HB1-sXJj6d29Cl19UYIKEs_mQw
+    RegistrationResponseV1:
+      required:
+        - Token
+      type: object
+      properties:
+        Token:
+          type: string
+          example: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJ0ZXN0Iiwic3ViIjoiMTIzNU2Nzg5IiwibmFtZSI6InBldGVyIiwiZXhwIjoxNjk0NjE1MDA1fQ.t5Z3BHNhYGIeS1dkouAZojW7RWIQN46eEnG0AZXchQBnWXTJgPCwf2LOpCf7JVfbO4lyWEUxBM8CsMEMjM_vclrr75GJP1IEBcxBM2Q1IGXqutOjfuGcxMoINiEncg_ZBNwFOzcGe0nvn4VtDNlEwXT_gwBxi5AjqqOgjfdHCZqhiXYYmnCvr4VV-nwk-eZyzFCXzoGvtKRnNtzJRVtVEdY1e9rMuNPCIXGhxW1MiB3hZImjZjtKtDODDuNlflGfpOB6Q_cVSyE0o_3Iqs7K-nOuMTFW4iGs1IzkOZG-8POWFkhMjjW1aXConB2_HB1-sXJj6d29Cl19UYIKEs_mQw
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+  responses:
+    UnauthorizedError:
+      description: Access token is missing or invalid

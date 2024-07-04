@@ -1,0 +1,99 @@
+= API TEST
+
+== Development environment
+
+=== System wide
+* OpenJDK 17.x
+* Maven 3.9.x
+* git
+* docker
+
+=== Product wide
+* WildFly 27.0.1.Final
+* Oracle XE 21c
+
+=== Database setup (Oracle XE 21c)
+
+==== Run oracle xe
+
+[source,bash]
+----
+# run oracle xe docker container
+docker run --name oracle-api-test -p 1521:1521 -p 5500:5500 -e ORACLE_PWD=password container-registry.oracle.com/database/express:21.3.0-xe
+----
+
+==== Configure oracle
+
+[source,bash]
+----
+# connect to bash in container
+docker exec -it oracle-api-test bash -c "source /home/oracle/.bashrc; bash"
+----
+[source]
+----
+# login via sqlplus
+sqlplus
+username: SYSTEM
+password: password
+
+# check if there is a pluggable database available (XEPDB1)
+select name,open_mode from v$pdbs;
+
+# switch session to XEPDB1
+alter session set container=xepdb1;
+
+# open XEPDB1
+alter pluggable database xepdb1 open;
+
+# create new user
+create user TEST identified by password quota unlimited on users;
+
+# grant rights to new user
+grant all privileges to TEST;
+
+# exit sqlplus and check if logging into new user works
+exit
+sqlplus test/password@//localhost/XEPDB1
+----
+
+==== Create MPDS-tables in local Oracle ====
+(config data will also be inserted in the database)
+
+[source]
+----
+# clean database
+mvn flyway:clean
+----
+[source]
+----
+# migrate database
+mvn flyway:migrate
+----
+
+==== Configure IntelliJ to work with Oracle
+
+[source]
+----
+# add datasource to IntelliJ
+Connection type: Service Name
+Host: localhost
+Service: XEPDB1?oracle.net.disableOob=true
+Authentication: User & Password
+User: TEST
+Password: password
+URL should be: jdbc:oracle:thin:@//localhost:1521/XEPDB1?oracle.net.disableOob=true
+----
+
+== Configurate DB Connection in Wildfly
+[source,bash]
+----
+cd ../tools/wildfly-27.0.1.Final/bin/
+
+sh jboss-cli.sh --connect
+
+module add --name=com.oracle --resources=/home/.../api-test/ojdbc11/ojdbc11.jar --dependencies=javax.api,javax.transaction.api
+
+/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)
+
+data-source add --name=ApiTestPersistenceDS --connection-url=jdbc:oracle:thin:@localhost:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiTestPersistenceDS --driver-name=oracle --user-name=TEST --password=password --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true
+----

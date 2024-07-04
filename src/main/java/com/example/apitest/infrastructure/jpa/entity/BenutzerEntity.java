@@ -1,0 +1,47 @@
+package com.example.apitest.infrastructure.jpa.entity;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "BENUTZER")
+@NamedQuery(name = "BenutzerEntity.findByEmail", query = "select b from BenutzerEntity b where b.email = :email")
+public class BenutzerEntity {
+
+    @Id
+    @GeneratedValue(generator = "GEN_SEQ_BENUTZER", strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "GEN_SEQ_BENUTZER", sequenceName = "SEQ_BENUTZER", allocationSize = 1)
+    @Column(name = "ID", nullable = false)
+    private Long id;
+
+    @Basic
+    @Column(name = "EMAIL", nullable = false, length = 256)
+    private String email;
+
+    @Basic
+    @Column(name = "PASSWORD", nullable = false, length = 256)
+    private String password;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+}
