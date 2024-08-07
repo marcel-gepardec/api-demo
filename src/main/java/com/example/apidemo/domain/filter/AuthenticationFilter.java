@@ -1,7 +1,7 @@
 package com.example.apidemo.domain.filter;
 
 import com.example.apidemo.domain.filter.annotation.Secured;
-import com.example.apidemo.domain.logic.JwtGenerator;
+import com.example.apidemo.domain.logic.JWTGenerator;
 import jakarta.annotation.Priority;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.NotAuthorizedException;
@@ -20,7 +20,7 @@ import java.io.IOException;
 public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Inject
-    private JwtGenerator jwtGenerator;
+    private JWTGenerator jwtGenerator;
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -29,12 +29,15 @@ public class AuthenticationFilter implements ContainerRequestFilter {
         String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
 
         // Check if the HTTP Authorization header is present and formatted correctly
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader == null) {
             throw new NotAuthorizedException("Authorization header must be provided");
         }
 
         // Extract the token from the HTTP Authorization header
-        String token = authorizationHeader.substring("Bearer".length()).trim();
+        String token = authorizationHeader;
+        if (authorizationHeader.startsWith("Bearer ")) {
+            token = authorizationHeader.substring("Bearer".length()).trim();
+        }
 
         try {
 

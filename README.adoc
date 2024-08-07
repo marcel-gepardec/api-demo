@@ -96,4 +96,24 @@ module add --name=com.oracle --resources=/home/.../api-demo/wildfly/modules/com/
 /subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)
 
 data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@localhost:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name=TEST --password=password --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true
+
+/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()
+
+/subsystem=microprofile-openapi-smallrye:add()
 ----
+
+== After Configuration
+Now you can start the WildFly server.
+
+Your API is callable under this URL: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/hello-world
+
+And if you want to see all Endpoint go to the SWAGGER UI: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/openapi-ui
+
+== Local Docker image build and run
+[source,bash]
+----
+docker build -t wildfly .
+
+docker run -p 8080:8080 wildfly
+----
+

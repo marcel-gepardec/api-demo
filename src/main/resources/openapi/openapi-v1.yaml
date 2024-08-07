@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: API Test
   description: API Test
@@ -10,15 +10,15 @@ paths:
     post:
       tags:
         - Login
-      summary: Login with a email and passwort and compare it with the data from the db
-      description: Login with a email and passwort and compare it with the data from the db
+      summary: Login with a email and password and compare it with the data from the db
+      description: Login with a email and password and compare it with the data from the db
       operationId: login
       requestBody:
-        description: Login with a email and passwort and compare it with the data from the db
+        description: Login with a email and password and compare it with the data from the db
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginV1'
+              $ref: '#/components/schemas/LoginDataV1'
         required: true
       responses:
         '200':
@@ -31,15 +31,15 @@ paths:
     post:
       tags:
         - Registration
-      summary: Registration with a email and passwort
-      description: Registration with a email and passwort
+      summary: Registration with a email and password
+      description: Registration with a email and password
       operationId: registration
       requestBody:
-        description: Registration with a email and passwort
+        description: Registration with a email and password
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/LoginV1'
+              $ref: '#/components/schemas/LoginDataV1'
         required: true
       responses:
         '200':
@@ -48,6 +48,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/RegistrationResponseV1'
+  /user/delete:
+    delete:
+      security:
+        - bearerAuth: [ ]
+      tags:
+        - Delete
+      summary: Deletion of user with email and password
+      description: Deletion of user with email and password
+      operationId: delete
+      requestBody:
+        description: Deletion of user with email and password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginDataV1'
+        required: true
+      responses:
+        '200':
+          description: successful operation
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: true
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
   /hello-world:
     get:
       security:
@@ -69,7 +95,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
 components:
   schemas:
-    LoginV1:
+    LoginDataV1:
       required:
         - email
         - password

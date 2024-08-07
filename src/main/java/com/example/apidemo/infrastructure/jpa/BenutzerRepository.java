@@ -17,6 +17,7 @@ public class BenutzerRepository {
 
     @Inject
     private BenutzerEntityTranslator benutzerEntityTranslator;
+
     @Transactional
     public Benutzer persistBenutzer(final Benutzer benutzer) {
         BenutzerEntity benutzerEntity = benutzerEntityTranslator.fromDomain(benutzer);
@@ -30,5 +31,20 @@ public class BenutzerRepository {
                 .getSingleResult();
 
         return benutzerEntityTranslator.toDomain(benutzerEntity);
+    }
+
+    public Boolean isEmailExist(final String email) {
+        return !entityManager.createNamedQuery("BenutzerEntity.findByEmail", BenutzerEntity.class)
+                .setParameter("email", email)
+                .getResultList()
+                .isEmpty();
+    }
+
+    @Transactional
+    public void delete(Benutzer benutzer) {
+        BenutzerEntity benutzerEntity = benutzerEntityTranslator.fromDomain(benutzer);
+        if (benutzerEntity != null) {
+            entityManager.remove(entityManager.contains(benutzerEntity) ? benutzerEntity : entityManager.merge(benutzerEntity));
+        }
     }
 }

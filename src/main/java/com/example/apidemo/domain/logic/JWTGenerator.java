@@ -13,9 +13,10 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 @ApplicationScoped
-public class JwtGenerator {
+public class JWTGenerator {
 
     private Algorithm algorithmPrivate;
     private Algorithm algorithmPublic;
@@ -37,41 +38,24 @@ public class JwtGenerator {
         }
     }
 
-    public String generate() {
-        try {
-            return JWT.create()
-                    .withIssuer("ApiDemo")
-                    .withSubject("TestToken")
-                    .withClaim("email", "testtoken@gmail.com")
-                    .withExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
-                    .sign(algorithmPrivate);
-        } catch (JWTCreationException exception) {
-            // Invalid Signing configuration / Couldn't convert Claims.
-        }
-        return null;
+    public String generate(Long userId) {
+        return generate(userId, Instant.now().plus(5, ChronoUnit.MINUTES));
     }
 
-    public String generate(String email) {
-        try {
-            return JWT.create()
-                    .withIssuer("test")
-                    .withSubject("123456789")
-                    .withClaim("email", email)
-                    .withExpiresAt(Instant.now().plus(30, ChronoUnit.MINUTES))
-                    .sign(algorithmPrivate);
-        } catch (JWTCreationException exception) {
-            // Invalid Signing configuration / Couldn't convert Claims.
-        }
-        return null;
+    public String generate(Long userId, Instant expirationTime) {
+        return generate(userId, Instant.now(), expirationTime);
     }
 
-    public String generate(String email, Instant expirationTime) {
+    public String generate(Long userId, Instant notBeforeTime, Instant expirationTime) {
         try {
             return JWT.create()
-                    .withIssuer("test")
-                    .withSubject("123456789")
-                    .withClaim("email", email)
+                    .withIssuer("API Demo")
+                    .withSubject("API Demo")
+                    .withJWTId(UUID.randomUUID().toString())
+                    .withClaim("userId", userId)
+                    .withIssuedAt(Instant.now())
                     .withExpiresAt(expirationTime)
+                    .withNotBefore(notBeforeTime)
                     .sign(algorithmPrivate);
         } catch (JWTCreationException exception) {
             // Invalid Signing configuration / Couldn't convert Claims.
@@ -82,7 +66,8 @@ public class JwtGenerator {
     public void validateToken(String token) throws Exception {
         JWTVerifier verifier = JWT.require(algorithmPublic)
                 // specify an specific claim validations
-                .withIssuer("test")
+                .withIssuer("API Demo")
+                .withSubject("API Demo")
                 // reusable verifier instance
                 .build();
 
