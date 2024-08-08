@@ -27,23 +27,47 @@ ARG DB_USER_PASSWORD
 ARG TARGETPLATFORM
 RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
         /bin/sh -c '$JBOSS_HOME/bin/standalone.sh -c=standalone.xml &' && \
-              sleep 10 && \
-              cd /tmp && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name="${DB_USER_NAME}" --password="${DB_USER_PASSWORD}" --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=microprofile-openapi-smallrye:add()" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown; \
+                echo "Waiting for WildFly to be ready..." && \
+                for i in {1..30}; do \
+                    if curl http://localhost:9990; then \
+                        echo "WildFly is up and running!" && \
+                        break; \
+                    else \
+                        echo "Waiting for WildFly... ($i/30)" && \
+                        sleep 5; \
+                    fi; \
+                done && \
+                if ! curl http://localhost:9990; then \
+                    echo "WildFly did not start in time!" && exit 1; \
+                fi && \
+                cd /tmp && \
+                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
+                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name="${DB_USER_NAME}" --password="${DB_USER_PASSWORD}" --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true" && \
+                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()" && \
+                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=microprofile-openapi-smallrye:add()" && \
+                $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown; \
     elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
         sleep 25; \
         /bin/sh -c '$JBOSS_HOME/bin/standalone.sh -c=standalone.xml &' && \
-              sleep 100 && \
-              cd /tmp && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name="${DB_USER_NAME}" --password="${DB_USER_PASSWORD}" --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=microprofile-openapi-smallrye:add()" && \
-              $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown; \
+                        echo "Waiting for WildFly to be ready..." && \
+                        for i in {1..30}; do \
+                            if curl http://localhost:9990; then \
+                                echo "WildFly is up and running!" && \
+                                break; \
+                            else \
+                                echo "Waiting for WildFly... ($i/30)" && \
+                                sleep 5; \
+                            fi; \
+                        done && \
+                        if ! curl http://localhost:9990; then \
+                            echo "WildFly did not start in time!" && exit 1; \
+                        fi && \
+                        cd /tmp && \
+                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
+                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name="${DB_USER_NAME}" --password="${DB_USER_PASSWORD}" --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true" && \
+                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()" && \
+                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=microprofile-openapi-smallrye:add()" && \
+                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown; \
     else \
         echo "Unknown architecture: ${TARGETPLATFORM}"; \
     fi
