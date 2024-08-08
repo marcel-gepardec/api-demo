@@ -42,15 +42,21 @@ jobs:
       - name: Build & push docker image
         uses: docker/build-push-action@v4
         with:
-          context: .
-          push: true
-          platforms: linux/amd64,linux/arm64  # Specify the platforms you need
-          tags: ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest
-          file: Dockerfile  # Adjust if your Dockerfile is not in the root directory
-          build-args: |
-            DB_USER_NAME=${{ env.DB_USER_NAME }}
-            DB_USER_PASSWORD=${{ env.DB_USER_PASSWORD }}
-          #Add here your environment Variables which you implemented above
+            context: .
+            push: true
+            platforms: linux/amd64,linux/arm64 # Specify the platforms you need
+            tags: ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest
+            build-args: |
+              DB_USER_NAME=${{ env.DB_USER_NAME }}
+              DB_USER_PASSWORD=${{ env.DB_USER_PASSWORD }}
+            #Add here your environment Variables which you implemented above
+            file: Dockerfile # Adjust if your Dockerfile is not in the root directory
+            outputs: digest
+
+      - name: Capture WildFly Logs
+        run: |
+            docker logs <container_id> | tee wildfly.log
+            cat wildfly.log
 
       - name: Image digest
         run: echo ${{ steps.build-and-push.outputs.digest }}

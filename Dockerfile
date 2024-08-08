@@ -38,7 +38,10 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
                     fi; \
                 done && \
                 if ! curl http://localhost:9990; then \
-                    echo "WildFly did not start in time!" && exit 1; \
+                    echo "WildFly did not start in time!" && \
+                                echo "WildFly logs:" && \
+                                cat $JBOSS_HOME/standalone/log/server.log && \
+                                exit 1; \
                 fi && \
                 cd /tmp && \
                 $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
@@ -60,7 +63,10 @@ RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
                             fi; \
                         done && \
                         if ! curl http://localhost:9990; then \
-                            echo "WildFly did not start in time!" && exit 1; \
+                            echo "WildFly did not start in time!" && \
+                                        echo "WildFly logs:" && \
+                                        cat $JBOSS_HOME/standalone/log/server.log && \
+                                        exit 1; \
                         fi && \
                         cd /tmp && \
                         $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
