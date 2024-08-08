@@ -16,7 +16,7 @@ COPY src ./src
 # Package the application to produce a WAR file
 RUN mvn package
 
-FROM quay.io/wildfly/wildfly:latest-jdk21
+FROM quay.io/wildfly/wildfly:33.0.0.Final-jdk21
 
 # Add Oracle driver module
 COPY src/main/resources/wildfly/modules $JBOSS_HOME/modules
@@ -24,61 +24,26 @@ COPY src/main/resources/wildfly/modules $JBOSS_HOME/modules
 ARG DB_USER_NAME
 ARG DB_USER_PASSWORD
 
-ARG TARGETPLATFORM
-RUN if [ "$TARGETPLATFORM" = "linux/amd64" ]; then \
-        /bin/sh -c '$JBOSS_HOME/bin/standalone.sh -c=standalone.xml &' && \
-                echo "Waiting for WildFly to be ready..." && \
-                for i in {1..30}; do \
-                    if curl http://localhost:9990; then \
-                        echo "WildFly is up and running!" && \
-                        break; \
-                    else \
-                        echo "Waiting for WildFly... ($i/30)" && \
-                        sleep 5; \
-                    fi; \
-                done && \
-                if ! curl http://localhost:9990; then \
-                    echo "WildFly did not start in time!" && \
-                                echo "WildFly logs:" && \
-                                cat $JBOSS_HOME/standalone/log/server.log && \
-                                exit 1; \
-                fi && \
-                cd /tmp && \
-                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
-                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name="${DB_USER_NAME}" --password="${DB_USER_PASSWORD}" --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true" && \
-                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()" && \
-                $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=microprofile-openapi-smallrye:add()" && \
-                $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown; \
-    elif [ "$TARGETPLATFORM" = "linux/arm64" ]; then \
-        sleep 25; \
-        /bin/sh -c '$JBOSS_HOME/bin/standalone.sh -c=standalone.xml &' && \
-                        echo "Waiting for WildFly to be ready..." && \
-                        for i in {1..30}; do \
-                            if curl http://localhost:9990; then \
-                                echo "WildFly is up and running!" && \
-                                break; \
-                            else \
-                                echo "Waiting for WildFly... ($i/30)" && \
-                                sleep 5; \
-                            fi; \
-                        done && \
-                        if ! curl http://localhost:9990; then \
-                            echo "WildFly did not start in time!" && \
-                                        echo "WildFly logs:" && \
-                                        cat $JBOSS_HOME/standalone/log/server.log && \
-                                        exit 1; \
-                        fi && \
-                        cd /tmp && \
-                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)" && \
-                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@host.docker.internal:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name="${DB_USER_NAME}" --password="${DB_USER_PASSWORD}" --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true" && \
-                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()" && \
-                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command="/subsystem=microprofile-openapi-smallrye:add()" && \
-                        $JBOSS_HOME/bin/jboss-cli.sh --connect --command=:shutdown; \
-    else \
-        echo "Unknown architecture: ${TARGETPLATFORM}"; \
-    fi
+ENV CONFIG_DIR=/tmp/config
 
-    # User root to modify war owners
+ENV JBOSS_HOME=/opt/jboss/wildfly
+ENV CONFIG_DIR=/tmp/config
+ENV DEPLOYMENT_DIR=$JBOSS_HOME/standalone/deployments
+
+# Create a temporary directory for configuration files
+RUN mkdir -p $CONFIG_DIR
+
+# Copy your standalone.xml to the temporary directory
+COPY src/main/resources/wildfly/config/standalone.xml $CONFIG_DIR/
+
+# Replace placeholder text in standalone.xml using sed
+RUN sed -i 's/DB_USER_NAME/'${DB_USER_NAME}'/g' $CONFIG_DIR/standalone.xml
+RUN sed -i 's/DB_USER_PASSWORD/'${DB_USER_PASSWORD}'/g' $CONFIG_DIR/standalone.xml
+
+# Copy the modified standalone.xml to the WildFly configuration directory
+RUN cp $CONFIG_DIR/standalone.xml $JBOSS_HOME/standalone/configuration/standalone.xml
+
+# User root to modify war owners
 USER root
 
 RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent

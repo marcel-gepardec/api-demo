@@ -9,7 +9,7 @@
 * docker
 
 === Product wide
-* WildFly 27.0.1.Final
+* WildFly 33.0.0.Final
 * Oracle XE 21c
 
 === Database setup (Oracle XE 21c)
