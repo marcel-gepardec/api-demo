@@ -39,24 +39,18 @@ jobs:
         run: |
           echo "repository=${GITHUB_REPOSITORY@L}" >> $GITHUB_OUTPUT
 
-      - name: Build & push docker image
-        uses: docker/build-push-action@v4
-        with:
-            context: .
-            push: true
-            platforms: linux/amd64,linux/arm64 # Specify the platforms you need
-            tags: ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest
-            build-args: |
-              DB_USER_NAME=${{ env.DB_USER_NAME }}
-              DB_USER_PASSWORD=${{ env.DB_USER_PASSWORD }}
-            #Add here your environment Variables which you implemented above
-            file: Dockerfile # Adjust if your Dockerfile is not in the root directory
-            outputs: digest
-
-      - name: Capture WildFly Logs
+      - name: Build and Push Docker Image
         run: |
-            docker logs <container_id> | tee wildfly.log
-            cat wildfly.log
+                docker buildx build --platform linux/amd64,linux/arm64 \
+                  --tag ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest \
+                  --build-arg DB_USER_NAME=${{ env.DB_USER_NAME }} \
+                  --build-arg DB_USER_PASSWORD=${{ env.DB_USER_PASSWORD }} \
+                  --push .
+
+      - name: Verify Image
+        run: |
+                docker pull ghcr.io/${{ github.repository_owner }}/${{ github.repository }}:latest
+                docker images
 
       - name: Image digest
         run: echo ${{ steps.build-and-push.outputs.digest }}
