@@ -91,7 +91,7 @@ cd ../tools/wildfly-27.0.1.Final/bin/
 
 sh jboss-cli.sh --connect
 
-module add --name=com.oracle --resources=/home/.../api-demo/wildfly/modules/com/oracle/main/ojdbc11.jar --dependencies=javax.api,javax.transaction.api
+module add --name=com.oracle --resources=/home/.../api-demo/src/main/resources/wildfly/modules/com/oracle/main/ojdbc11.jar --dependencies=javax.api,javax.transaction.api
 
 /subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)
 
