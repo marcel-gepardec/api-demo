@@ -119,6 +119,8 @@ environment:          # Set Passwords, User and Database
   MYSQL_DATABASE: ApiDemo  # Create a database named 'ApiDemo'
   MYSQL_USER: DB_USER_NAME  # Create a user with the specified username
   MYSQL_PASSWORD: DB_USER_PASSWORD  # Set the password for the user
+# Attention!!! If you use Linux/ARM64, you need to add this to your /etc/hosts file
+$ echo "172.17.0.1       host.docker.internal" | sudo tee -a /etc/hosts > /dev/null
 #Run docker compose file
 $ docker compose up -d
 ----
