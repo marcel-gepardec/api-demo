@@ -71,8 +71,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           script: |
-            docker container rm -f ${{ env.IMAGE_NAME }} 2> /dev/null || true
-            docker image rm ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest 2> /dev/null || true
+            docker compose down
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
             docker compose up -d
             rm -rf docker-compose.yml
