@@ -85,5 +85,4 @@ jobs:
             docker compose down
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
             docker compose up -d
-            rm docker-compose.yml
-            rm -rf src/
+          # docker compose down -v | -v removes all volumes as well

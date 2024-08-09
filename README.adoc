@@ -113,6 +113,12 @@ $ docker run --detach -p 8080:8080 wildfly
 ----
 #Pull repository
 $ git pull https://github.com/marcel-gepardec/api-demo.git
+#Replace configuration for mysql database in the file docker-compose.yml
+environment:          # Set Passwords, User and Database
+  MYSQL_ROOT_PASSWORD: password  # Set the root password for MySQL
+  MYSQL_DATABASE: ApiDemo  # Create a database named 'ApiDemo'
+  MYSQL_USER: DB_USER_NAME  # Create a user with the specified username
+  MYSQL_PASSWORD: DB_USER_PASSWORD  # Set the password for the user
 #Run docker compose file
 $ docker compose up -d
 ----
