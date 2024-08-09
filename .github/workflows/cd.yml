@@ -70,7 +70,7 @@ jobs:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
-          source: src/main/resources/db/migration/V0_9_0__initial_db_creation.sql
+          source: ./src/main/resources/db/migration/V0_9_0__initial_db_creation.sql
           target: /home/${{ env.SSH_USER }}/
 
       - name: Pull image and start container
