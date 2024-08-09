@@ -62,7 +62,7 @@ jobs:
             username: ${{ env.SSH_USER }}
             key: ${{ env.SSH_PRIVATE_KEY }}
             source: "docker-compose.yml"
-            target: "~/docker-compose.yml"
+            target: "~/"
 
       - name: Copy SQL file to server
         uses: appleboy/scp-action@v0.1.7
@@ -71,7 +71,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           source: "src/main/resources/db/migration/V0_9_0__initial_db_creation.sql"
-          target: "~/src/main/resources/db/migration/V0_9_0__initial_db_creation.sql"
+          target: "~/"
 
       - name: Pull image and start container
         uses: appleboy/ssh-action@v1.0.3
