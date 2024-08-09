@@ -108,3 +108,11 @@ $ docker build --platform linux/amd64 --build-arg DB_USER_NAME=TEST --build-arg 
 $ docker run --detach -p 8080:8080 wildfly
 ----
 
+== Deploy on own server
+[source,bash]
+----
+#Pull repository
+$ git pull https://github.com/marcel-gepardec/api-demo.git
+#Run docker compose file
+$ docker compose up -d
+----
