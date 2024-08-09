@@ -79,10 +79,9 @@ jobs:
           host: ${{ env.SSH_HOST }}
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
-          envs: |
-            DB_USER_NAME=${{ env.DB_USER_NAME }}
-            DB_USER_PASSWORD=${{ env.DB_USER_PASSWORD }}
           script: |
+            sed -i 's/DB_USER_NAME/${{ env.DB_USER_NAME }}/g' ~/docker-compose.yml
+            sed -i 's/DB_USER_PASSWORD/${{ env.DB_USER_PASSWORD }}/g' ~/docker-compose.yml
             docker compose down
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
             docker compose up -d
