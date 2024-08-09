@@ -3,117 +3,103 @@
 == Development environment
 
 === System wide
-* OpenJDK 17.x
-* Maven 3.9.x
+* OpenJDK 21.0.3 LTS
+* Apache Maven 3.9.8
 * git
 * docker
 
 === Product wide
 * WildFly 33.0.0.Final
-* Oracle XE 21c
+* MySQL 8.1.0
 
-=== Database setup (Oracle XE 21c)
+=== Database setup (MySQL 8.1.0)
 
-==== Run oracle xe
-
-[source,bash]
-----
-# run oracle xe docker container
-docker run --name oracle-api-demo -p 1521:1521 -p 5500:5500 -e ORACLE_PWD=password container-registry.oracle.com/database/express:21.3.0-xe
-----
-
-==== Configure oracle
+==== Run mysql docker
 
 [source,bash]
 ----
-# connect to bash in container
-docker exec -it oracle-api-demo bash -c "source /home/oracle/.bashrc; bash"
+#Run mysql docker container
+docker run --detach --name mysql-api-demo -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=ApiDemo -p 3306:3306 mysql:8.1.0
 ----
-[source]
+
+==== Configure mysql
+
+[source,bash]
 ----
-# login via sqlplus
-sqlplus
-username: SYSTEM
-password: password
+#Connect to bash in container
+docker exec -it mysql-api-demo mysql -u root -ppassword
+----
+[source,bash]
+----
+#Create new user
+CREATE USER 'TEST'@'%' IDENTIFIED BY 'password';
 
-# check if there is a pluggable database available (XEPDB1)
-select name,open_mode from v$pdbs;
+#Grant rights to new user
+GRANT ALL ON `ApiDemo`.* TO 'TEST'@'%';
 
-# switch session to XEPDB1
-alter session set container=xepdb1;
+FLUSH PRIVILEGES;
 
-# open XEPDB1
-alter pluggable database xepdb1 open;
-
-# create new user
-create user TEST identified by password quota unlimited on users;
-
-# grant rights to new user
-grant all privileges to TEST;
-
-# exit sqlplus and check if logging into new user works
+#Exit mysql and check if logging into new user works
 exit
-sqlplus test/password@//localhost/XEPDB1
+docker exec -it mysql-api-demo mysql -u TEST -ppassword
 ----
-
-==== Create MPDS-tables in local Oracle ====
+==== Create MPDS-tables in local MySQL ====
 (config data will also be inserted in the database)
 
-[source]
+[source,bash]
 ----
-# clean database
+#Clean database
 mvn flyway:clean
 ----
-[source]
+[source,bash]
 ----
-# migrate database
+#Migrate database
 mvn flyway:migrate
 ----
 
-==== Configure IntelliJ to work with Oracle
+==== Configure IntelliJ to work with MySQL
 
-[source]
+[source,bash]
 ----
-# add datasource to IntelliJ
-Connection type: Service Name
+#Add datasource to IntelliJ
 Host: localhost
-Service: XEPDB1?oracle.net.disableOob=true
+Port: 3306
 Authentication: User & Password
 User: TEST
 Password: password
-URL should be: jdbc:oracle:thin:@//localhost:1521/XEPDB1?oracle.net.disableOob=true
+URL should be: jdbc:mysql://localhost:3306/ApiDemo
 ----
 
-== Configurate DB Connection in Wildfly
+==== Configurate DB Connection in Wildfly
 [source,bash]
 ----
-cd ../tools/wildfly-27.0.1.Final/bin/
+cd ../tools/wildfly-33.0.0.Final/bin/
 
 sh jboss-cli.sh --connect
 
-module add --name=com.oracle --resources=/home/.../api-demo/src/main/resources/wildfly/modules/com/oracle/main/ojdbc11.jar --dependencies=javax.api,javax.transaction.api
+module add --name=com.mysql --resources=/home/.../api-demo/src/main/resources/wildfly/modules/com/mysql/main/mysql-connector-j-9.0.0.jar --dependencies=javax.api,javax.transaction.api
 
-/subsystem=datasources/jdbc-driver=oracle:add(driver-name=oracle,driver-module-name=com.oracle,driver-xa-datasource-class-name=oracle.jdbc.xa.client.OracleXADataSource)
+/subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class-name=com.mysql.cj.jdbc.MysqlXADataSource)
 
-data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:oracle:thin:@localhost:1521/XEPDB1?oracle.net.disableOob=true --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=oracle --user-name=TEST --password=password --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.oracle.OracleExceptionSorter --enabled=true
+data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:mysql://localhost:3306/ApiDemo --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=mysql --user-name=TEST --password=password --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter --enabled=true
 
 /extension=org.wildfly.extension.microprofile.openapi-smallrye:add()
 
 /subsystem=microprofile-openapi-smallrye:add()
 ----
 
-== After Configuration
+=== After Configuration
 Now you can start the WildFly server.
 
-Your API is callable under this URL: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/hello-world
+- Your API is callable under this URL: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/hello-world
 
-And if you want to see all Endpoint go to the SWAGGER UI: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/openapi-ui
+- And if you want to see all Endpoint go to the SWAGGER UI: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/openapi-ui
 
-== Local Docker image build and run
+=== Or build and run Docker image locally
 [source,bash]
 ----
-docker build -t wildfly .
+docker build --platform linux/amd64 --build-arg DB_USER_NAME=TEST --build-arg DB_USER_PASSWORD=password -t wildfly .
 
-docker run -p 8080:8080 wildfly
+docker run --detach -p 8080:8080 wildfly
 ----
 

@@ -8,17 +8,16 @@ import jakarta.persistence.*;
 public class BenutzerEntity {
 
     @Id
-    @GeneratedValue(generator = "GEN_SEQ_BENUTZER", strategy = GenerationType.SEQUENCE)
-    @SequenceGenerator(name = "GEN_SEQ_BENUTZER", sequenceName = "SEQ_BENUTZER", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID", nullable = false)
     private Long id;
 
     @Basic
-    @Column(name = "EMAIL", nullable = false, length = 256)
+    @Column(name = "EMAIL", nullable = false, unique = true)
     private String email;
 
     @Basic
-    @Column(name = "PASSWORD", nullable = false, length = 256)
+    @Column(name = "PASSWORD", nullable = false)
     private String password;
 
     public Long getId() {
