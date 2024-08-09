@@ -17,8 +17,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: password  # Set the root password for MySQL
       MYSQL_DATABASE: ApiDemo  # Create a database named 'ApiDemo'
-      MYSQL_USER: TEST  # Create a user with the specified username
-      MYSQL_PASSWORD: password  # Set the password for the user
+      MYSQL_USER: ${DB_USER_NAME}  # Create a user with the specified username
+      MYSQL_PASSWORD: ${DB_USER_PASSWORD}  # Set the password for the user
     volumes:
       - db_data:/var/lib/mysql  # Persist MySQL data
       - ./src/main/resources/db/migration/V0_9_0__initial_db_creation.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the SQL script
