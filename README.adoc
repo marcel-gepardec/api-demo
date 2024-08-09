@@ -19,7 +19,7 @@
 [source,bash]
 ----
 #Run mysql docker container
-docker run --detach --name mysql-api-demo -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=ApiDemo -p 3306:3306 mysql:8.1.0
+$ docker run --detach --name mysql-api-demo -e MYSQL_ROOT_PASSWORD=password -e MYSQL_DATABASE=ApiDemo -p 3306:3306 mysql:8.1.0
 ----
 
 ==== Configure mysql
@@ -27,34 +27,34 @@ docker run --detach --name mysql-api-demo -e MYSQL_ROOT_PASSWORD=password -e MYS
 [source,bash]
 ----
 #Connect to bash in container
-docker exec -it mysql-api-demo mysql -u root -ppassword
+$ docker exec -it mysql-api-demo mysql -u root -ppassword
 ----
 [source,bash]
 ----
 #Create new user
-CREATE USER 'TEST'@'%' IDENTIFIED BY 'password';
+MYSQL> CREATE USER 'TEST'@'%' IDENTIFIED BY 'password';
 
 #Grant rights to new user
-GRANT ALL ON `ApiDemo`.* TO 'TEST'@'%';
+MYSQL> GRANT ALL ON `ApiDemo`.* TO 'TEST'@'%';
+MYSQL> FLUSH PRIVILEGES;
 
-FLUSH PRIVILEGES;
-
-#Exit mysql and check if logging into new user works
-exit
-docker exec -it mysql-api-demo mysql -u TEST -ppassword
+#Exit mysql
+MYSQL> exit
+#Check if logging into new user works
+$ docker exec -it mysql-api-demo mysql -u TEST -ppassword
 ----
-==== Create MPDS-tables in local MySQL ====
+==== Create ApiDemo-tables in local MySQL ====
 (config data will also be inserted in the database)
 
 [source,bash]
 ----
 #Clean database
-mvn flyway:clean
+$ mvn flyway:clean
 ----
 [source,bash]
 ----
 #Migrate database
-mvn flyway:migrate
+$ mvn flyway:migrate
 ----
 
 ==== Configure IntelliJ to work with MySQL
@@ -73,19 +73,23 @@ URL should be: jdbc:mysql://localhost:3306/ApiDemo
 ==== Configurate DB Connection in Wildfly
 [source,bash]
 ----
-cd ../tools/wildfly-33.0.0.Final/bin/
+$ cd /home/.../tools/wildfly-33.0.0.Final/bin/
 
-sh jboss-cli.sh --connect
+#Linux
+$ sh jboss-cli.sh --connect
+#Windows
+> .\jboss-cli.bat --connect
 
-module add --name=com.mysql --resources=/home/.../api-demo/src/main/resources/wildfly/modules/com/mysql/main/mysql-connector-j-9.0.0.jar --dependencies=javax.api,javax.transaction.api
 
-/subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class-name=com.mysql.cj.jdbc.MysqlXADataSource)
+[standalone@localhost:9990 /] module add --name=com.mysql --resources=/home/.../api-demo/src/main/resources/wildfly/modules/com/mysql/main/mysql-connector-j-9.0.0.jar --dependencies=javax.api,javax.transaction.api
 
-data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:mysql://localhost:3306/ApiDemo --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=mysql --user-name=TEST --password=password --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter --enabled=true
+[standalone@localhost:9990 /] /subsystem=datasources/jdbc-driver=mysql:add(driver-name=mysql,driver-module-name=com.mysql,driver-xa-datasource-class-name=com.mysql.cj.jdbc.MysqlXADataSource)
 
-/extension=org.wildfly.extension.microprofile.openapi-smallrye:add()
+[standalone@localhost:9990 /] data-source add --name=ApiDemoPersistenceDS --connection-url=jdbc:mysql://localhost:3306/ApiDemo --jndi-name=java:jboss/datasources/ApiDemoPersistenceDS --driver-name=mysql --user-name=TEST --password=password --transaction-isolation=TRANSACTION_READ_COMMITTED --min-pool-size=10 --max-pool-size=50 --pool-prefill=true --allocation-retry=3 --allocation-retry-wait-millis=100 --valid-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker --validate-on-match=false --background-validation=true --background-validation-millis=30000 --stale-connection-checker-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLStaleConnectionChecker --exception-sorter-class-name=org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter --enabled=true
 
-/subsystem=microprofile-openapi-smallrye:add()
+[standalone@localhost:9990 /] /extension=org.wildfly.extension.microprofile.openapi-smallrye:add()
+
+[standalone@localhost:9990 /] /subsystem=microprofile-openapi-smallrye:add()
 ----
 
 === After Configuration
@@ -98,8 +102,9 @@ Now you can start the WildFly server.
 === Or build and run Docker image locally
 [source,bash]
 ----
-docker build --platform linux/amd64 --build-arg DB_USER_NAME=TEST --build-arg DB_USER_PASSWORD=password -t wildfly .
-
-docker run --detach -p 8080:8080 wildfly
+#Build docker image
+$ docker build --platform linux/amd64 --build-arg DB_USER_NAME=TEST --build-arg DB_USER_PASSWORD=password -t wildfly .
+#Run docker image
+$ docker run --detach -p 8080:8080 wildfly
 ----
 
