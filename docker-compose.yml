@@ -21,7 +21,7 @@ services:
       MYSQL_PASSWORD: password  # Set the password for the user
     volumes:
       - db_data:/var/lib/mysql  # Persist MySQL data
-      - V0_9_0__initial_db_creation.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the SQL script
+      - test.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the SQL script
 
 networks:
   api-demo-network:
