@@ -71,7 +71,7 @@ jobs:
           username: ${{ env.SSH_USER }}
           key: ${{ env.SSH_PRIVATE_KEY }}
           source: "src/main/resources/db/migration/V0_9_0__initial_db_creation.sql"
-          target: "~/test.sql"
+          target: "~/src/main/resources/db/migration/V0_9_0__initial_db_creation.sql"
 
       - name: Pull image and start container
         uses: appleboy/ssh-action@v1.0.3
@@ -84,3 +84,4 @@ jobs:
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
             docker compose up -d
             rm -rf docker-compose.yml
+            rm -rf src/
