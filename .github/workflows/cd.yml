@@ -76,7 +76,9 @@ jobs:
             grep -q 'host.docker.internal' /etc/hosts || { echo "Add '172.17.0.1 host.docker.internal' to /etc/hosts"; exit 1; }
             docker compose down
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
+            docker pull ghcr.io/${{ steps.lower-repo.outputs.repository }}:latest
+            docker image prune -f
             docker compose up -d
             rm docker-compose.yml
-            rm -rf src/
+            rm -rf flyway-db/
           # docker compose down -v | -v removes all volumes as well
