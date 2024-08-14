@@ -48,6 +48,7 @@ $ docker exec -it mysql-api-demo mysql -u TEST -ppassword
 
 [source,bash]
 ----
+$ cd flyway-db
 #Clean database
 $ mvn flyway:clean
 ----
@@ -95,9 +96,9 @@ $ sh jboss-cli.sh --connect
 === After Configuration
 Now you can start the WildFly server.
 
-- Your API is callable under this URL: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/hello-world
+- Your API is callable under this URL: http://localhost:8080/apiDemoWar-1.0-SNAPSHOT/api/hello-world
 
-- And if you want to see all Endpoint go to the SWAGGER UI: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/openapi-ui
+- And if you want to see all Endpoint go to the SWAGGER UI: http://localhost:8080/apiDemoWar-1.0-SNAPSHOT/api/openapi-ui
 
 === Or build and run Docker image locally
 [source,bash]
@@ -119,7 +120,7 @@ environment:          # Set Passwords, User and Database
   MYSQL_DATABASE: ApiDemo  # Create a database named 'ApiDemo'
   MYSQL_USER: DB_USER_NAME  # Create a user with the specified username
   MYSQL_PASSWORD: DB_USER_PASSWORD  # Set the password for the user
-# Attention!!! If you use Linux/ARM64, you need to add this to your /etc/hosts file
+#Attention!!! If you use Linux/ARM64, you need to add this to your /etc/hosts file
 $ echo "172.17.0.1       host.docker.internal" | sudo tee -a /etc/hosts > /dev/null
 #Run docker compose file
 $ docker compose up -d

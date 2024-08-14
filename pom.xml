@@ -5,10 +5,18 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.example</groupId>
-    <artifactId>api-demo</artifactId>
+    <artifactId>api-demo-root</artifactId>
     <version>1.0-SNAPSHOT</version>
-    <name>api-demo</name>
-    <packaging>war</packaging>
+    <name>api-demo-root</name>
+
+    <modules>
+        <module>apiDemoWar</module>
+        <module>application</module>
+        <module>domain</module>
+        <module>infrastructure</module>
+        <module>flyway-db</module>
+    </modules>
+    <packaging>pom</packaging>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -16,6 +24,9 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <maven.compiler.release>21</maven.compiler.release>
+
+        <!-- Building war file -->
+        <version.maven-war-plugin>3.3.2</version.maven-war-plugin>
 
         <!-- plugins -->
         <version.flyway-maven-plugin>10.15.0</version.flyway-maven-plugin>
@@ -27,14 +38,148 @@
         <!-- SLF4J (derived from org.jboss.bom:eap-runtime-artifacts) -->
         <version.org.slf4j-base>1.7.22</version.org.slf4j-base>
         <version.org.slf4j>${version.org.slf4j-base}.redhat-2</version.org.slf4j>
+
+        <!-- openapi code generation -->
+        <version.openapi-generator-maven-plugin>7.0.0</version.openapi-generator-maven-plugin>
     </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>infrastructure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.example</groupId>
+                <artifactId>application</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <!-- java -->
+            <dependency>
+                <groupId>jakarta.platform</groupId>
+                <artifactId>jakarta.jakartaee-api</artifactId>
+                <version>10.0.0</version>
+                <scope>provided</scope>
+            </dependency>
+
+            <!-- testing -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>${junit.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- logging -->
+            <dependency>
+                <groupId>commons-logging</groupId>
+                <artifactId>commons-logging</artifactId>
+                <version>1.2</version>
+            </dependency>
+
+            <!-- slf4j -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>2.0.9</version>
+            </dependency>
+
+            <!-- jwt -->
+            <dependency>
+                <groupId>com.auth0</groupId>
+                <artifactId>java-jwt</artifactId>
+                <version>4.4.0</version>
+            </dependency>
+
+            <!-- Json -->
+            <dependency>
+                <groupId>org.json</groupId>
+                <artifactId>json</artifactId>
+                <version>20240303</version>
+            </dependency>
+
+            <!-- hashing -->
+            <dependency>
+                <groupId>org.springframework.security</groupId>
+                <artifactId>spring-security-crypto</artifactId>
+                <version>6.0.3</version>
+            </dependency>
+            <dependency>
+                <groupId>org.bouncycastle</groupId>
+                <artifactId>bcprov-jdk18on</artifactId>
+                <version>1.78.1</version>
+            </dependency>
+
+            <!-- openapi generative code -->
+            <dependency>
+                <groupId>javax.annotation</groupId>
+                <artifactId>javax.annotation-api</artifactId>
+                <version>1.3.2</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.gson</groupId>
+                <artifactId>gson</artifactId>
+                <version>2.10.1</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okio</groupId>
+                <artifactId>okio</artifactId>
+                <version>3.5.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>okhttp</artifactId>
+                <version>4.11.0</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>4.11.0</version>
+            </dependency>
+            <dependency>
+                <groupId>io.gsonfire</groupId>
+                <artifactId>gson-fire</artifactId>
+                <version>1.8.5</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>3.0.2</version>
+            </dependency>
+
+            <!-- swagger ui generation: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/openapi-ui -->
+            <dependency>
+                <groupId>org.microprofile-ext.openapi-ext</groupId>
+                <artifactId>openapi-ui</artifactId>
+                <version>2.0.0</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.eclipse.microprofile.openapi</groupId>
+                <artifactId>microprofile-openapi-api</artifactId>
+                <version>3.1.1</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <dependencies>
         <!-- java -->
         <dependency>
             <groupId>jakarta.platform</groupId>
             <artifactId>jakarta.jakartaee-api</artifactId>
-            <version>10.0.0</version>
             <scope>provided</scope>
         </dependency>
 
@@ -42,13 +187,11 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
@@ -56,154 +199,57 @@
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.2</version>
+            <scope>provided</scope>
         </dependency>
 
         <!-- slf4j -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>2.0.9</version>
-        </dependency>
-
-        <!-- jwt -->
-        <dependency>
-            <groupId>com.auth0</groupId>
-            <artifactId>java-jwt</artifactId>
-            <version>4.4.0</version>
-        </dependency>
-
-        <!-- Json -->
-        <dependency>
-            <groupId>org.json</groupId>
-            <artifactId>json</artifactId>
-            <version>20240303</version>
-        </dependency>
-
-        <!-- hashing -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-crypto</artifactId>
-            <version>6.0.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.bouncycastle</groupId>
-            <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.78.1</version>
-        </dependency>
-
-        <!-- openapi generative code -->
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>javax.annotation-api</artifactId>
-            <version>1.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okio</groupId>
-            <artifactId>okio</artifactId>
-            <version>3.5.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>logging-interceptor</artifactId>
-            <version>4.11.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.gsonfire</groupId>
-            <artifactId>gson-fire</artifactId>
-            <version>1.8.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.findbugs</groupId>
-            <artifactId>jsr305</artifactId>
-            <version>3.0.2</version>
-        </dependency>
-
-        <!-- swagger ui generation: http://localhost:8080/api-demo-1.0-SNAPSHOT/api/openapi-ui -->
-        <dependency>
-            <groupId>org.microprofile-ext.openapi-ext</groupId>
-            <artifactId>openapi-ui</artifactId>
-            <version>2.0.0</version>
-            <scope>runtime</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.microprofile.openapi</groupId>
-            <artifactId>microprofile-openapi-api</artifactId>
-            <version>3.1.1</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 
-
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-war-plugin</artifactId>
-                <version>3.3.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.flywaydb</groupId>
-                <artifactId>flyway-maven-plugin</artifactId>
-                <version>${version.flyway-maven-plugin}</version>
-                <configuration>
-                    <encoding>UTF-8</encoding>
-                    <driver>com.mysql.cj.jdbc.Driver</driver>
-                    <url>jdbc:mysql://localhost:3306/ApiDemo</url>
-                    <locations>
-                        <location>filesystem:src/main/resources/db/migration</location>
-                        <location>filesystem:src/main/resources/db/testmigration</location>
-                    </locations>
-                    <user>TEST</user>
-                    <password>password</password>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>${version.maven-war-plugin}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.flywaydb</groupId>
+                    <artifactId>flyway-maven-plugin</artifactId>
+                    <version>${version.flyway-maven-plugin}</version>
+                    <configuration>
+                        <encoding>UTF-8</encoding>
+                        <driver>com.mysql.cj.jdbc.Driver</driver>
+                        <url>jdbc:mysql://localhost:3306/ApiDemo</url>
+                        <locations>
+                            <location>filesystem:src/main/resources/db/migration</location>
+                            <location>filesystem:src/main/resources/db/testmigration</location>
+                        </locations>
+                        <user>TEST</user>
+                        <password>password</password>
 
-                    <cleanDisabled>false</cleanDisabled>
-                    <validateMigrationNaming>true</validateMigrationNaming>
-                </configuration>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.flywaydb</groupId>
-                        <artifactId>flyway-mysql</artifactId>
-                        <version>${version.flyway-mysql}</version>
-                    </dependency>
-                    <dependency>
-                        <groupId>com.mysql</groupId>
-                        <artifactId>mysql-connector-j</artifactId>
-                        <version>${version.com.mysql.database.jdbc}</version>
-                    </dependency>
-                </dependencies>
-            </plugin>
-            <plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <!-- RELEASE_VERSION -->
-                <version>7.0.0</version>
-                <!-- /RELEASE_VERSION -->
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>${project.basedir}/src/main/resources/openapi/openapi-v1.yaml</inputSpec>
-                            <generatorName>java</generatorName>
-                            <generateApiTests>false</generateApiTests>
-                            <generateModelTests>false</generateModelTests>
-                            <output>${project.build.directory}/generated-sources</output>
-                            <modelPackage>com.example.apidemo.rest.model</modelPackage>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
+                        <cleanDisabled>false</cleanDisabled>
+                        <validateMigrationNaming>true</validateMigrationNaming>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.flywaydb</groupId>
+                            <artifactId>flyway-mysql</artifactId>
+                            <version>${version.flyway-mysql}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.mysql</groupId>
+                            <artifactId>mysql-connector-j</artifactId>
+                            <version>${version.com.mysql.database.jdbc}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>

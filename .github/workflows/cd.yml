@@ -55,25 +55,16 @@ jobs:
       - name: Image digest
         run: echo ${{ steps.build-and-push.outputs.digest }}
 
-      - name: Copy Docker Compose file to server
+      - name: Copy config files to server
         uses: appleboy/scp-action@v0.1.7
         with:
             host: ${{ env.SSH_HOST }}
             username: ${{ env.SSH_USER }}
             key: ${{ env.SSH_PRIVATE_KEY }}
-            source: "docker-compose.yml"
+            source: "docker-compose.yml,flyway-db/src/main/resources/db/migration/V0_9_0__initial_db_creation.sql"
             target: "~/"
 
-      - name: Copy SQL file to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ env.SSH_HOST }}
-          username: ${{ env.SSH_USER }}
-          key: ${{ env.SSH_PRIVATE_KEY }}
-          source: "src/main/resources/db/migration/V0_9_0__initial_db_creation.sql"
-          target: "~/"
-
-      - name: Pull image and start container
+      - name: Start Docker compose and remove config files
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ env.SSH_HOST }}
@@ -82,6 +73,7 @@ jobs:
           script: |
             sed -i 's/DB_USER_NAME/${{ env.DB_USER_NAME }}/g' ~/docker-compose.yml
             sed -i 's/DB_USER_PASSWORD/${{ env.DB_USER_PASSWORD }}/g' ~/docker-compose.yml
+            grep -q 'host.docker.internal' /etc/hosts || { echo "Add '172.17.0.1 host.docker.internal' to /etc/hosts"; exit 1; }
             docker compose down
             echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u $ --password-stdin
             docker compose up -d

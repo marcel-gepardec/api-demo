@@ -3,15 +3,11 @@ version: '3.8'  # Specify the Docker Compose file version
 services:
   wildfly:
     image: ghcr.io/marcel-gepardec/api-demo:latest
-    networks:
-      - api-demo-network
     ports:
       - "8080:8080"
 
   db:
     image: mysql:8.1.0
-    networks:
-      - api-demo-network
     ports:
       - "3306:3306"
     environment:          # Set Passwords, User and Database
@@ -21,7 +17,7 @@ services:
       MYSQL_PASSWORD: DB_USER_PASSWORD  # Set the password for the user
     volumes:
       - db_data:/var/lib/mysql  # Persist MySQL data
-      - ./src/main/resources/db/migration/V0_9_0__initial_db_creation.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the initial SQL script
+      - ./flyway-db/src/main/resources/db/migration/V0_9_0__initial_db_creation.sql:/docker-entrypoint-initdb.d/init.sql  # Mount the initial SQL script
 
 networks:
   api-demo-network:

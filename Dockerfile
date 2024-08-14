@@ -2,11 +2,11 @@ FROM maven:3.9.8-eclipse-temurin-21 AS build
 
 WORKDIR /app
 
-COPY pom.xml .
+COPY pom.xml ./pom.xml
+
+COPY ./ ./
 
 RUN mvn dependency:go-offline
-
-COPY src ./src
 
 RUN mvn package
 
@@ -18,9 +18,9 @@ ARG DB_USER_PASSWORD
 USER root
 
 # Add Oracle driver module
-COPY src/main/resources/wildfly/modules $JBOSS_HOME/modules
+COPY wildfly/modules $JBOSS_HOME/modules
 # Copy the CLI script into the container
-COPY src/main/resources/wildfly/config/wildfly-config.cli $JBOSS_HOME/configuration/wildfly-config.cli
+COPY wildfly/config/wildfly-config.cli $JBOSS_HOME/configuration/wildfly-config.cli
 RUN sed -i 's/DB_USER_NAME/'${DB_USER_NAME}'/g' $JBOSS_HOME/configuration/wildfly-config.cli
 RUN sed -i 's/DB_USER_PASSWORD/'${DB_USER_PASSWORD}'/g' $JBOSS_HOME/configuration/wildfly-config.cli
 
@@ -31,7 +31,7 @@ RUN $JBOSS_HOME/bin/jboss-cli.sh --file=$JBOSS_HOME/configuration/wildfly-config
 RUN /opt/jboss/wildfly/bin/add-user.sh admin admin --silent
 
 WORKDIR /opt/jboss/wildfly/standalone/deployments/
-COPY --from=build /app/target/*.war $JBOSS_HOME/standalone/deployments/
+COPY --from=build /app/apiDemoWar/target/*.war $JBOSS_HOME/standalone/deployments/
 
 RUN chmod -R 777 $JBOSS_HOME/standalone/configuration/
 RUN rm -rf $JBOSS_HOME/standalone/configuration/standalone_xml_history/current
